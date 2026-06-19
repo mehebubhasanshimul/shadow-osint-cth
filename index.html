@@ -10,9 +10,7 @@
             --primary: #00ffcc; /* Premium Cyan */
             --accent: #ff0055;  /* Neon Cyber Pink */
             --warning: #ffcc00;
-            /* আপনার দেওয়া গ্লিচ ম্যাট্রিক্স ব্যাকগ্রাউন্ড */
             --bg-hack: url('https://media.giphy.com/media/3oKIPlCroSFHV8uoko/giphy.gif');
-            /* প্রিমিয়াম গ্লাস-মর্ফিজম ব্যাকগ্রাউন্ড ও শ্যাডো */
             --glass-bg: rgba(255, 255, 255, 0.06);
             --glass-border: rgba(255, 255, 255, 0.15);
             --neon-glow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 255, 204, 0.2);
@@ -27,7 +25,6 @@
             overflow-x: hidden;
         }
 
-        /* Premium Glassmorphism Card */
         .container {
             width: 100%; max-width: 500px; padding: 40px 30px; 
             background: var(--glass-bg);
@@ -44,7 +41,6 @@
 
         .logo-wrapper { position: relative; width: 100px; height: 100px; margin: 0 auto 20px; }
         
-        /* আপনার দেওয়া সিম্পসন লোগো */
         .logo-gif { 
             width: 100%; height: 100%; border-radius: 50%; 
             border: 2px solid var(--primary); padding: 3px;
@@ -89,10 +85,9 @@
             box-shadow: 0 0 20px var(--primary); transform: translateY(-2px); 
         }
 
-        /* গ্লাস টার্মিনাল উইন্ডো */
         #result {
             display: none; margin-top: 25px; text-align: left; 
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             padding: 20px; border-radius: 14px; border: 1px solid var(--glass-border);
             max-height: 280px; overflow-y: auto;
         }
@@ -177,7 +172,23 @@
                 });
                 const resData = await response.json();
 
-                if (resData.success && resData.data && resData.data.success) {
+                // ১. ভেরসেল সার্ভার ফাংশন এরর চেক
+                if (resData && resData.error) {
+                    alert("Backend Server Error: " + resData.details);
+                    timestamp.innerText = "SERVER ERROR";
+                    return;
+                }
+
+                // ২. রেসপন্স ডাটা প্রসেস এবং রেন্ডার
+                if (resData && resData.success && resData.data) {
+                    
+                    // যদি RapidAPI থেকে সরাসরি লিমিট ওভার বা কোনো অ্যালার্ট অবজেক্ট আসে
+                    if (resData.data.message) {
+                        alert("API Alert: " + resData.data.message);
+                        timestamp.innerText = "API_ALERT";
+                        return;
+                    }
+
                     const results = resData.data.result || [];
                     if (results.length === 0) {
                         resultContent.innerHTML = `<p style="color:var(--primary); text-align:center; font-size:0.85rem;">🟢 Secure! No data leak found in public repositories.</p>`;
@@ -196,8 +207,9 @@
                     timestamp.innerText = "SUCCESS (200)";
                     resultDiv.style.display = "block";
                 } else {
-                    alert("RapidAPI Message: কোটা শেষ অথবা এরর রেসপন্স এসেছে!");
-                    timestamp.innerText = "FAILED (403)";
+                    // ৩. ডায়াগনস্টিক ডিবাগ (যদি অদ্ভুত বা অজানা ফরম্যাট আসে)
+                    alert("Raw API Debug: " + JSON.stringify(resData));
+                    timestamp.innerText = "BAD_RESPONSE";
                 }
             } catch (err) {
                 alert("সার্ভার টাইমআউট বা কানেকশন এরর!");
