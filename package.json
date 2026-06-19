@@ -1,17 +1,15 @@
 {
-  "name": "shadow-joker-osint-suite",
+  "name": "shadow-osint-investor",
   "version": "1.0.0",
-  "description": "Advanced Multi-OSINT Suite with Truecaller, BreachDirectory, and WhatsApp Lookup Tools",
+  "description": "Premium Glassmorphism Breach Leak Scanner Tool",
   "main": "api/search.js",
   "scripts": {
     "start": "vercel dev"
   },
   "keywords": [
     "osint",
-    "truecaller",
-    "breachdirectory",
-    "shadow-joker",
-    "cyber-team-help"
+    "breach-directory",
+    "shadow-osint-investor"
   ],
   "author": "SHADOW JOKER",
   "license": "MIT",
