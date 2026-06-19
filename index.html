@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHADOW JOKER | Advanced Multi-OSINT Suite</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00d2ff;
+            --accent: #00ff00;
+            --danger: #ff3e3e;
+            --warning: #ffcc00;
+            --bg-hack: url('https://media.giphy.com/media/xTiTnx37nc3vjsdeLK/giphy.gif');
+            --card-bg: rgba(5, 10, 20, 0.92);
+            --neon-glow: 0 0 20px rgba(0, 210, 255, 0.4), 0 0 40px rgba(0, 255, 0, 0.1);
+            --border-glow: 0 0 15px rgba(0, 255, 0, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Consolas', 'Fira Code', monospace; }
+
+        body {
+            background-image: var(--bg-hack);
+            background-size: cover; background-position: center; background-attachment: fixed;
+            min-height: 100vh; display: flex; justify-content: center; align-items: center; color: #fff; padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%; max-width: 550px; padding: 35px; background: var(--card-bg);
+            border-radius: 20px; border: 2px solid var(--primary); box-shadow: var(--neon-glow);
+            text-align: center; backdrop-filter: blur(12px); position: relative;
+            animation: borderPulse 4s infinite alternate;
+        }
+
+        @keyframes borderPulse {
+            0% { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
+            100% { border-color: var(--accent); box-shadow: 0 0 25px rgba(0, 255, 0, 0.5); }
+        }
+
+        .logo-wrapper { position: relative; width: 95px; height: 95px; margin: 0 auto 15px; }
+        .logo-gif { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--accent); box-shadow: var(--border-glow); object-fit: cover; }
+        
+        .scanner-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: scanAnim 2s linear infinite;
+        }
+        @keyframes scanAnim { 0% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+        h1 {
+            font-size: 1.8rem; font-weight: 900; letter-spacing: 2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--warning), var(--primary));
+            background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-transform: uppercase; animation: gradientText 5s infinite linear;
+        }
+        @keyframes gradientText { 0% { background-position: 0%; } 100% { background-position: 100%; } }
+
+        .credit { 
+            color: var(--warning); font-size: 0.8rem; margin: 10px 0 25px; display: inline-block; 
+            border: 1px dashed var(--warning); padding: 4px 12px; border-radius: 6px;
+            background: rgba(255, 204, 0, 0.05);
+        }
+
+        /* ট্যাব প্রফেশনাল গ্রিড */
+        .tab-box { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 25px; }
+        .tab-btn {
+            flex: 1; min-width: 140px; padding: 12px; background: rgba(0,0,0,0.7); border: 2px solid #1e293b;
+            color: #64748b; cursor: pointer; border-radius: 10px; font-weight: bold; font-size: 0.8rem; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 6px; text-transform: uppercase;
+        }
+        .tab-btn.active { 
+            border-color: var(--primary); color: var(--primary); 
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.3); background: rgba(0, 210, 255, 0.08); 
+        }
+        .tab-btn:hover { color: #fff; border-color: #475569; }
+
+        .input-group { position: relative; margin-bottom: 20px; }
+        input {
+            width: 100%; padding: 16px; background: rgba(0, 0, 0, 0.85); border: 2px solid #1e293b;
+            border-radius: 12px; color: var(--accent); font-size: 0.95rem; outline: none; text-align: center;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 12px rgba(0, 255, 0, 0.3); }
+
+        button.scan-btn {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), #0052c2);
+            border: 2px solid var(--accent); border-radius: 12px; font-weight: bold; font-size: 1rem;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 2px; color: #fff; transition: 0.4s;
+            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+        }
+        button.scan-btn:hover { 
+            background: linear-gradient(135deg, #0052c2, var(--accent)); color: #000; 
+            box-shadow: var(--border-glow); transform: translateY(-2px); 
+        }
+
+        /* সাইবার টার্মিনাল আউটপুট উইন্ডো */
+        #result {
+            display: none; margin-top: 30px; text-align: left; background: rgba(0, 0, 0, 0.95);
+            padding: 20px; border-radius: 14px; border: 1px solid var(--primary); border-left: 4px solid var(--accent);
+            max-height: 320px; overflow-y: auto; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+        }
+        #result::-webkit-scrollbar { width: 6px; }
+        #result::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+        .terminal-header { 
+            font-size: 0.75rem; color: #475569; margin-bottom: 15px; 
+            border-bottom: 1px dashed #1e293b; padding-bottom: 6px; 
+            display: flex; justify-content: space-between; letter-spacing: 1px;
+        }
+        
+        .data-row { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; line-height: 1.6; }
+        .leak-source { color: var(--danger); font-weight: bold; text-transform: uppercase; }
+        .leak-info { color: #94a3b8; padding-left: 10px; display: block; margin-top: 3px; }
+        
+        .tc-profile-img { 
+            width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--accent); 
+            display: block; margin: 5px auto 15px; box-shadow: var(--border-glow); object-fit: cover;
+        }
+
+        .loader-box { display: none; margin: 25px auto; }
+        .loader-gif { width: 55px; height: 55px; border-radius: 50%; border: 1px solid var(--primary); }
+        
+        .admin-link { 
+            display: inline-block; margin-top: 30px; color: var(--primary); text-decoration: none; 
+            font-size: 0.85rem; padding: 8px 20px; border-radius: 25px; 
+            background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.2);
+            transition: 0.3s; letter-spacing: 1px;
+        }
+        .admin-link:hover { color: var(--accent); border-color: var(--accent); background: rgba(0, 255, 0, 0.05); box-shadow: 0 0 10px rgba(0, 255, 0, 0.2); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo-wrapper">
+            <img src="https://media.giphy.com/media/xTcnSWYZvafyhEACBO/giphy.gif" alt="Shadow Joker Logo" class="logo-gif">
+            <div class="scanner-line"></div>
+        </div>
+
+        <h1>SHADOW JOKER OSINT</h1>
+        <span class="credit"><i class="fa-solid fa-terminal"></i> CYBER TEAM HELP</span>
+
+        <div class="tab-box">
+            <div class="tab-btn active" onclick="setMode('truecaller', 'Enter Phone Number (e.g. 019...)')" id="tabTC">
+                <i class="fa-solid fa-address-book"></i> Truecaller
+            </div>
+            <div class="tab-btn" onclick="setMode('breach', 'Enter Email or Number')" id="tabBreach">
+                <i class="fa-solid fa-shield-virus"></i> Leak Scan
+            </div>
+            <div class="tab-btn" onclick="setMode('whatsapp', 'Enter WhatsApp Number')" id="tabWA">
+                <i class="fa-brands fa-whatsapp"></i> WA Profiler
+            </div>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="targetInput" placeholder="Enter Phone Number (e.g. 019...)">
+        </div>
+        <button onclick="executeScan()" class="scan-btn" id="btnSubmit">Initiate Threat Scan</button>
+
+        <div class="loader-box" id="loader">
+            <img src="https://media.giphy.com/media/xTcnSWYZvafyhEACBO/giphy.gif" class="loader-gif">
+            <p style="color: var(--accent); font-size: 0.8rem; margin-top: 8px; letter-spacing: 1px;" id="loaderText">DECRYPTING VECTOR...</p>
+        </div>
+
+        <div id="result">
+            <div class="terminal-header">
+                <span id="termMode">[DATALOG REGISTERED]</span>
+                <span id="timestamp">STATUS: IDLE</span>
+            </div>
+            <div id="resultContent"></div>
+        </div>
+
+        <br>
+        <a href="https://t.me/SHADOW_JOKER_CTH" target="_blank" class="admin-link">
+            <i class="fa-brands fa-telegram"></i> Secure Contact Admin
+        </a>
+    </div>
+
+    <script>
+        let currentMode = 'truecaller';
+
+        function setMode(mode, placeholder) {
+            currentMode = mode;
+            document.getElementById('targetInput').value = "";
+            document.getElementById('targetInput').placeholder = placeholder;
+            document.getElementById('tabTC').classList.toggle('active', mode === 'truecaller');
+            document.getElementById('tabBreach').classList.toggle('active', mode === 'breach');
+            document.getElementById('tabWA').classList.toggle('active', mode === 'whatsapp');
+        }
+
+        async function executeScan() {
+            let target = document.getElementById('targetInput').value.trim();
+            const btn = document.getElementById('btnSubmit');
+            const loader = document.getElementById('loader');
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            const timestamp = document.getElementById('timestamp');
+            const termMode = document.getElementById('termMode');
+
+            if (!target) return alert("দয়া করে ইনপুট ফিল্ডটি পূরণ করুন!");
+
+            loader.style.display = "block";
+            resultDiv.style.display = "none";
+            resultContent.innerHTML = "";
+            btn.disabled = true;
+
+            // ==========================================
+            // ১. মোড: Truecaller Info স্ক্যান লজিক
+            // ==========================================
+            if (currentMode === 'truecaller') {
+                termMode.innerText = "[TRUECALLER INTEL LOG]";
+                timestamp.innerText = "FETCHING NUMBER INFO...";
+
+                let dialingCode = "880"; 
+                let cleanNum = target.replace(/\D/g, ''); 
+                if (cleanNum.startsWith('880')) cleanNum = cleanNum.substring(3);
+                else if (cleanNum.startsWith('0')) cleanNum = cleanNum.substring(1);
+
+                if (cleanNum.length !== 10) {
+                    loader.style.display = "none"; btn.disabled = false;
+                    return alert("দয়া করে একটি সঠিক ১১ ডিজিটের নাম্বার দিন!");
+                }
+
+                try {
+                    const response = await fetch('/api/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'truecaller', phone: cleanNum, dialingCode: dialingCode })
+                    });
+                    const resData = await response.json();
+
+                    if (resData.success && resData.data && resData.data.error === 0) {
+                        const info = resData.data.data;
+                        
+                        let imgTag = info.basicInfo?.image ? `<img src="${info.basicInfo.image}" class="tc-profile-img">` : '';
+                        let name = info.basicInfo?.name?.fullName || "No Name Found";
+                        let numFormatted = info.phoneInfo?.e164Format || ("+880" + cleanNum);
+                        let city = info.addressInfo?.city || "";
+                        let country = info.addressInfo?.countryCode || "BD";
+
+                        resultContent.innerHTML = `
+                            ${imgTag}
+                            <div class="data-row">👤 <span style="color:var(--accent); font-weight:bold;">Name:</span> ${name}</div>
+                            <div class="data-row">📞 <span style="color:#fff; font-weight:bold;">Number:</span> ${numFormatted}</div>
+                            <div class="data-row">📍 <span style="color:var(--warning); font-weight:bold;">Location:</span> ${city ? `${city}, ${country}` : "Bangladesh"}</div>
+                        `;
+                        timestamp.innerText = "SUCCESS (200)";
+                        resultDiv.style.display = "block";
+                    } else {
+                        alert("Truecaller API Error: তথ্য পাওয়া যায়নি বা কোটা শেষ!");
+                        timestamp.innerText = "FAILED (403)";
+                    }
+                } catch (err) {
+                    alert("সার্ভার কানেকশন এরর!");
+                    timestamp.innerText = "CRITICAL ERROR";
+                } finally {
+                    loader.style.display = "none";
+                    btn.disabled = false;
+                }
+            } 
+            
+            // ==========================================
+            // ২. মোড: BreachDirectory স্ক্যান লজিক
+            // ==========================================
+            else if (currentMode === 'breach') {
+                termMode.innerText = "[BREACH VECTOR LOG]";
+                timestamp.innerText = "QUERYING CORE...";
+
+                try {
+                    const response = await fetch('/api/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ target: target, type: 'breach' })
+                    });
+                    const resData = await response.json();
+
+                    if (resData.success && resData.data && resData.data.success) {
+                        const results = resData.data.result || [];
+                        if (results.length === 0) {
+                            resultContent.innerHTML = `<p style="color:var(--accent); text-align:center;">🟢 Secure! No data leak found in public repositories.</p>`;
+                        } else {
+                            results.forEach(leak => {
+                                const div = document.createElement('div');
+                                div.className = 'data-row';
+                                div.innerHTML = `
+                                    📁 <span class="leak-source">Source: ${leak.sources || 'Unknown Breach'}</span>
+                                    <span class="leak-info">📧 Pwned Data: ${leak.email || 'N/A'}</span>
+                                    <span class="leak-info">🔑 Password/Hash: <span style="color:var(--warning)">${leak.password || 'Hashes Locked'}</span></span>
+                                `;
+                                resultContent.appendChild(div);
+                            });
+                        }
+                        timestamp.innerText = "SUCCESS (200)";
+                        resultDiv.style.display = "block";
+                    } else {
+                        alert("RapidAPI Error: কোটা শেষ অথবা অবৈধ রেসপন্স!");
+                        timestamp.innerText = "FAILED (403)";
+                    }
+                } catch (err) {
+                    alert("সার্ভার টাইমআউট বা কানেকশন এরর!");
+                    timestamp.innerText = "CRITICAL ERROR";
+                } finally {
+                    loader.style.display = "none";
+                    btn.disabled = false;
+                }
+            } 
+            
+            // ==========================================
+            // ৩. মোড: WhatsApp Web Protocol লজিক
+            // ==========================================
+            else if (currentMode === 'whatsapp') {
+                termMode.innerText = "[WHATSAPP PROTOCOL VECTORS]";
+                timestamp.innerText = "REDIRECT ROUTE READY";
+                
+                let cleanWA = target.replace(/\D/g, '');
+                if (cleanWA.startsWith('0')) cleanWA = '880' + cleanWA.substring(1);
+                if (!cleanWA.startsWith('880')) cleanWA = '880' + cleanWA;
+
+                resultContent.innerHTML = `
+                    <div style="text-align:center; padding:10px;">
+                        <i class="fa-brands fa-whatsapp" style="font-size:2.5rem; color:var(--accent); margin-bottom: 10px;"></i>
+                        <p style="margin:10px 0; font-size:0.85rem; color:#94a3b8;">টার্গেটের প্রোফাইল চেক করতে এবং সরাসরি এনক্রিপ্টেড চ্যাট উইন্ডো ওপেন করতে নিচের বাটনে ক্লিক করুন:</p>
+                        <a href="https://api.whatsapp.com/send/?phone=${cleanWA}&text&type=phone_number&app_absent=0" target="_blank" style="display:block; text-decoration:none; text-align:center; padding:14px; font-weight:bold; border:2px solid var(--accent); background:rgba(0,255,0,0.08); color:var(--accent); border-radius:8px; text-transform:uppercase; font-size:0.85rem; letter-spacing:1px; transition:0.3s; margin-top:15px;">
+                            <i class="fa-solid fa-bolt"></i> Open Secure WA Profile
+                        </a>
+                    </div>
+                `;
+                resultDiv.style.display = "block";
+                loader.style.display = "none";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
