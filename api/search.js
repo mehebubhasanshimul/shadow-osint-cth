@@ -20,6 +20,8 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+    
+    // এপিআই যদি কোনো এরর বা মেসেজ পাঠায়, তাও যেন ফ্রন্টএন্ড পায়
     return res.status(200).json({ success: true, data: data });
     
   } catch (error) {
