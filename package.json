@@ -1,0 +1,24 @@
+{
+  "name": "shadow-joker-osint-suite",
+  "version": "1.0.0",
+  "description": "Advanced Multi-OSINT Suite with Truecaller, BreachDirectory, and WhatsApp Lookup Tools",
+  "main": "api/search.js",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "keywords": [
+    "osint",
+    "truecaller",
+    "breachdirectory",
+    "shadow-joker",
+    "cyber-team-help"
+  ],
+  "author": "SHADOW JOKER",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/node": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
